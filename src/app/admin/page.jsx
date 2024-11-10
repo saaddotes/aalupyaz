@@ -5,7 +5,7 @@ import Login from "@/components/Login";
 import { useAuth } from "@/context/authContext";
 import React from "react";
 
-export default function page() {
+export default function AdminPage() {
   const { currentUser, loading } = useAuth();
 
   if (loading) {

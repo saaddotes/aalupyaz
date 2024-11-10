@@ -17,7 +17,6 @@ export default function Admin() {
   const [selectedVegetable, setSelectedVegetable] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -42,7 +41,7 @@ export default function Admin() {
     try {
       // Get the document reference for the selected vegetable
       const vegetableRefCol = collection(db, "vegetables");
-      if (selectedVegetable?.id) {
+      if (selectedVegetable?.id && selectedVegetable.id !== "new") {
         const vegetableRef = doc(vegetableRefCol, selectedVegetable.id); // Assuming each vegetable has an `id`
 
         // Update the vegetable data in Firebase
@@ -52,6 +51,7 @@ export default function Admin() {
           price: selectedVegetable.price,
         });
       } else {
+        // If it's a new vegetable (id: "new"), add it to the Firestore collection
         await addDoc(vegetableRefCol, {
           name: selectedVegetable.name,
           imgSrc: selectedVegetable.imgSrc,
@@ -59,10 +59,10 @@ export default function Admin() {
         });
       }
 
-      console.log("Successfully updated vegetable:", selectedVegetable);
+      console.log("Successfully saved vegetable:", selectedVegetable);
       handleCloseModal(); // Close the modal after saving
     } catch (error) {
-      console.error("Error updating vegetable:", error);
+      console.error("Error saving vegetable:", error);
       alert("Failed to save changes. Please try again.");
     } finally {
       setIsSaving(false); // Set saving state to false when operation is complete (success or failure)
@@ -121,7 +121,7 @@ export default function Admin() {
                 name: "",
                 imgSrc: "/vegetables/",
                 price: 100,
-                id: "new",
+                id: "new", // This ID indicates a new vegetable
               })
             }
           >
@@ -191,7 +191,11 @@ export default function Admin() {
         {isModalOpen && selectedVegetable && (
           <div className="modal modal-open">
             <div className="modal-box">
-              <h2>Edit Vegetable</h2>
+              <h2>
+                {selectedVegetable.id === "new"
+                  ? "Add Vegetable"
+                  : "Edit Vegetable"}
+              </h2>
               <div className="form-control">
                 <label className="label">
                   <span className="label-text">Name</span>
@@ -241,24 +245,25 @@ export default function Admin() {
                 />
               </div>
               <div className="modal-action flex justify-between px-2">
-                <button
-                  className={`btn btn-error text-slate-200 ${
-                    isDeleting ? "loading" : ""
-                  }`}
-                  onClick={handleDelete}
-                  disabled={isSaving || isDeleting}
-                >
-                  {isDeleting ? "Deleting..." : "Delete Vegetable"}
-                </button>
+                {selectedVegetable.id !== "new" && (
+                  <button
+                    className={`btn btn-error text-slate-200 ${
+                      isDeleting ? "loading" : ""
+                    }`}
+                    onClick={handleDelete}
+                    disabled={isSaving || isDeleting}
+                  >
+                    {isDeleting ? "Deleting..." : "Delete Vegetable"}
+                  </button>
+                )}
                 <div className="space-x-2">
                   <button
                     className={`btn btn-primary ${isSaving ? "loading" : ""}`}
                     onClick={handleSaveChanges}
-                    disabled={isSaving}
+                    disabled={isSaving || isDeleting}
                   >
-                    {isSaving ? "Saving..." : "Save Changes"}{" "}
+                    {isSaving ? "Saving..." : "Save Changes"}
                   </button>
-
                   <button className="btn" onClick={handleCloseModal}>
                     Close
                   </button>
