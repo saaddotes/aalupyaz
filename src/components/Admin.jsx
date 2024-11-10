@@ -1,0 +1,273 @@
+"use client";
+import { useData } from "@/context/dataContext";
+import React, { useState, useEffect } from "react";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
+import { db } from "@/firebase/config";
+import Link from "next/link";
+
+export default function Admin() {
+  const { vegetables, loading, error } = useData();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedVegetable, setSelectedVegetable] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    if (error) {
+      console.error("Error fetching vegetables:", error);
+    }
+  }, [error]);
+
+  const handleEditClick = (vegetable) => {
+    setSelectedVegetable(vegetable);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedVegetable(null);
+  };
+
+  const handleSaveChanges = async () => {
+    setIsSaving(true); // Set saving state to true when saving starts
+
+    try {
+      // Get the document reference for the selected vegetable
+      const vegetableRefCol = collection(db, "vegetables");
+      if (selectedVegetable?.id) {
+        const vegetableRef = doc(vegetableRefCol, selectedVegetable.id); // Assuming each vegetable has an `id`
+
+        // Update the vegetable data in Firebase
+        await updateDoc(vegetableRef, {
+          name: selectedVegetable.name,
+          imgSrc: selectedVegetable.imgSrc,
+          price: selectedVegetable.price,
+        });
+      } else {
+        await addDoc(vegetableRefCol, {
+          name: selectedVegetable.name,
+          imgSrc: selectedVegetable.imgSrc,
+          price: selectedVegetable.price,
+        });
+      }
+
+      console.log("Successfully updated vegetable:", selectedVegetable);
+      handleCloseModal(); // Close the modal after saving
+    } catch (error) {
+      console.error("Error updating vegetable:", error);
+      alert("Failed to save changes. Please try again.");
+    } finally {
+      setIsSaving(false); // Set saving state to false when operation is complete (success or failure)
+    }
+  };
+
+  const handleDelete = async () => {
+    setIsDeleting(true); // Set deleting state to true when deleting starts
+
+    try {
+      // Get the document reference for the selected vegetable
+      const vegetableRef = doc(db, "vegetables", selectedVegetable.id); // Assuming each vegetable has an `id`
+
+      // Delete the vegetable document from Firebase
+      await deleteDoc(vegetableRef);
+
+      console.log("Successfully deleted vegetable:", selectedVegetable);
+      handleCloseModal(); // Close the modal after deleting
+    } catch (error) {
+      console.error("Error deleting vegetable:", error);
+      alert("Failed to delete vegetable. Please try again.");
+    } finally {
+      setIsDeleting(false); // Set deleting state to false when operation is complete (success or failure)
+    }
+  };
+
+  const filteredVegetables = vegetables.filter((vegetable) =>
+    vegetable.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (!vegetables || vegetables.length === 0) {
+    return <div>No vegetables found.</div>;
+  }
+
+  return (
+    <>
+      <div className="navbar bg-base-100 shadow-md py-3">
+        <div className="flex-1">
+          <span className=" text-3xl font-extrabold text-green-800">
+            AaluPyaz/Admin
+          </span>
+        </div>
+        <div className="flex-none gap-2">
+          <button
+            className="btn btn-primary"
+            onClick={() =>
+              handleEditClick({
+                name: "",
+                imgSrc: "/vegetables/",
+                price: 100,
+                id: "new",
+              })
+            }
+          >
+            Add Item +
+          </button>
+          <input
+            type="text"
+            placeholder="Search vegetables..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="input input-bordered w-full md:w-[30vw] p-2 mx-auto"
+          />
+          <Link href={"/"} className="btn">
+            Home
+          </Link>
+        </div>
+      </div>
+      <div className="overflow-auto h-[85vh] w-[90vw] mx-auto mt-2">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Images</th>
+              <th>Name</th>
+              <th>ImgSrc</th>
+              <th>Price</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredVegetables.length > 0 ? (
+              filteredVegetables.map(({ id, name, imgSrc, price }, index) => (
+                <tr key={`${id}-${price}-${index}`}>
+                  <td>
+                    <div className="avatar">
+                      <div className="mask mask-squircle h-12 w-12">
+                        <img src={imgSrc} alt={name} />
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div>
+                      <div className="font-bold">{name}</div>
+                    </div>
+                  </td>
+                  <td>{imgSrc}</td>
+                  <td>{price}</td>
+                  <th>
+                    <button
+                      className="btn btn-ghost btn-xs"
+                      onClick={() =>
+                        handleEditClick({ id, name, imgSrc, price })
+                      }
+                    >
+                      Edit
+                    </button>
+                  </th>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5">No vegetables match the search criteria.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+
+        {isModalOpen && selectedVegetable && (
+          <div className="modal modal-open">
+            <div className="modal-box">
+              <h2>Edit Vegetable</h2>
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Name</span>
+                </label>
+                <input
+                  type="text"
+                  value={selectedVegetable.name}
+                  onChange={(e) =>
+                    setSelectedVegetable((prev) => ({
+                      ...prev,
+                      name: e.target.value,
+                    }))
+                  }
+                  className="input input-bordered"
+                />
+              </div>
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Image URL</span>
+                </label>
+                <input
+                  type="text"
+                  value={selectedVegetable.imgSrc}
+                  onChange={(e) =>
+                    setSelectedVegetable((prev) => ({
+                      ...prev,
+                      imgSrc: e.target.value,
+                    }))
+                  }
+                  className="input input-bordered"
+                />
+              </div>
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text">Price</span>
+                </label>
+                <input
+                  type="number"
+                  value={selectedVegetable.price}
+                  onChange={(e) =>
+                    setSelectedVegetable((prev) => ({
+                      ...prev,
+                      price: e.target.value,
+                    }))
+                  }
+                  className="input input-bordered"
+                />
+              </div>
+              <div className="modal-action flex justify-between px-2">
+                <button
+                  className={`btn btn-error text-slate-200 ${
+                    isDeleting ? "loading" : ""
+                  }`}
+                  onClick={handleDelete}
+                  disabled={isSaving || isDeleting}
+                >
+                  {isDeleting ? "Deleting..." : "Delete Vegetable"}
+                </button>
+                <div className="space-x-2">
+                  <button
+                    className={`btn btn-primary ${isSaving ? "loading" : ""}`}
+                    onClick={handleSaveChanges}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? "Saving..." : "Save Changes"}{" "}
+                  </button>
+
+                  <button className="btn" onClick={handleCloseModal}>
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}

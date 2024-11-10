@@ -2,14 +2,14 @@ import Image from "next/image";
 
 const VegetableCard = ({ name, price, imgSrc }) => {
   return (
-    <div className="max-w-xs bg-white rounded-lg shadow-lg overflow-hidden transform transition-all hover:translate-y-[-10px]">
+    <div className="max-w-xs bg-white rounded-lg shadow-lg overflow-hidden  ">
       <Image
         src={imgSrc}
         alt={name}
         quality={90}
-        width={160}
-        height={120}
-        className="w-full h-32 object-cover"
+        width={100}
+        height={75}
+        className="w-36 h-36 mx-auto object-cover"
       />
       <div className="p-3 text-center">
         <h3 className="text-md font-semibold text-gray-800">{name}</h3>

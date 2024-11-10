@@ -1,11 +1,25 @@
 "use client";
 import { useState } from "react";
 import VegetableCard from "./VegetableCard";
+import { useData } from "@/context/dataContext";
 
-const SearchAndFilter = ({ vegetables }) => {
+const SearchAndFilter = () => {
+  const { vegetables, loading, error } = useData(); // Destructure loading and error
   const [searchQuery, setSearchQuery] = useState("");
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(500);
+
+  const now = new Date();
+  const formattedDate = now.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+  // Handle case when data is loading or there's an error
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  if (!vegetables || vegetables.length === 0)
+    return <div>No vegetables available.</div>;
 
   // Filter vegetables based on search query and price range
   const filteredVegetables = vegetables.filter((vegetable) => {
@@ -18,56 +32,93 @@ const SearchAndFilter = ({ vegetables }) => {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="bg-[#bbea70cc] py-5 sticky top-0 z-10">
-        <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 px-2 items-center justify-center">
-          <div className=" w-full md:w-1/3">
+    <div className="space-y-6 ">
+      <div className="navbar bg-base-100 shadow-md py-3 sticky top-0 z-10">
+        <div className="flex-1">
+          <span className=" text-3xl font-extrabold text-green-800">
+            AaluPyaz
+          </span>
+        </div>
+
+        <div className="flex-none gap-2">
+          <div className="form-control">
             <input
               type="text"
-              id="search"
               placeholder="Search vegetables..."
+              className="input input-bordered w-24 md:w-[30vw]"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full py-2 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ease-in-out"
             />
           </div>
 
-          <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 w-full md:w-1/2">
-            <div className="flex items-center">
-              <span className="ms-5 text-sm text-slate-50">Min Price</span>
-              <input
-                type="number"
-                id="minPrice"
-                value={minPrice}
-                onChange={(e) => setMinPrice(e.target.value)}
-                className="py-2 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div className="flex items-center">
-              <span className="ms-5 text-sm text-slate-50">Max Price</span>
-              <input
-                type="number"
-                id="maxPrice"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
-                className="py-2 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+          <div className="dropdown dropdown-end">
+            <button className="btn btn-outline">Price Filter</button>
+            <ul
+              tabIndex={0}
+              className="dropdown-content bg-base-100 shadow-md rounded-box w-52 p-4"
+            >
+              <li>
+                <div className="flex flex-col space-y-2">
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text text-sm">Min Price</span>
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="Min"
+                      className="input input-bordered w-full"
+                      value={minPrice || ""}
+                      onChange={(e) =>
+                        setMinPrice(
+                          e.target.value === "" ? "" : Number(e.target.value)
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text text-sm">Max Price</span>
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="Max"
+                      className="input input-bordered w-full"
+                      value={maxPrice || ""}
+                      onChange={(e) =>
+                        setMaxPrice(
+                          e.target.value === "" ? "" : Number(e.target.value)
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div className="hidden md:flex items-center gap-4">
+            <div className="flex items-center space-x-2 bg-blue-100 text-blue-800 p-3 rounded-lg shadow-md">
+              <span className="font-semibold">Rate as Today:</span>
+              <span className="font-semibold">{formattedDate}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Filtered Vegetable Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-5">
-        {filteredVegetables.map((vegetable, index) => (
-          <div key={`${vegetable.name}-${vegetable.price}-${index}`}>
-            <VegetableCard
-              name={vegetable.name}
-              price={vegetable.price}
-              imgSrc={vegetable.imgSrc}
-            />
-          </div>
-        ))}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-5">
+        {filteredVegetables.length > 0 ? (
+          filteredVegetables.map((vegetable, index) => (
+            <div key={`${vegetable.name}-${vegetable.price}-${index}`}>
+              <VegetableCard
+                name={vegetable.name}
+                price={vegetable.price}
+                imgSrc={vegetable.imgSrc}
+              />
+            </div>
+          ))
+        ) : (
+          <div>No vegetables match the filter criteria.</div>
+        )}
       </div>
     </div>
   );
