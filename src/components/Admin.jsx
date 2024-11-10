@@ -109,13 +109,13 @@ export default function Admin() {
     <>
       <div className="navbar bg-base-100 shadow-md py-3">
         <div className="flex-1">
-          <span className=" text-3xl font-extrabold text-green-800">
-            AaluPyaz/Admin
+          <span className="text-lg  md:text-3xl font-extrabold text-green-800">
+            DailySabzi
           </span>
         </div>
         <div className="flex-none gap-2">
           <button
-            className="btn btn-primary"
+            className="btn btn-primary hidden md:block"
             onClick={() =>
               handleEditClick({
                 name: "",
@@ -132,7 +132,7 @@ export default function Admin() {
             placeholder="Search vegetables..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="input input-bordered w-full md:w-[30vw] p-2 mx-auto"
+            className="input input-bordered text-xs md:text-base w-36 md:w-[30vw] p-2 mx-auto"
           />
           <Link href={"/"} className="btn">
             Home
@@ -273,6 +273,19 @@ export default function Admin() {
           </div>
         )}
       </div>
+      <button
+        className="btn btn-primary rounded-full md:hidden fixed bottom-7 right-5"
+        onClick={() =>
+          handleEditClick({
+            name: "",
+            imgSrc: "/vegetables/",
+            price: 100,
+            id: "new", // This ID indicates a new vegetable
+          })
+        }
+      >
+        Item +
+      </button>
     </>
   );
 }

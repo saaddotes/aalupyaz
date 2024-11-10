@@ -36,8 +36,8 @@ const SearchAndFilter = () => {
     <div className="space-y-6 ">
       <div className="navbar bg-base-100 shadow-md py-3 sticky top-0 z-10">
         <div className="flex-1">
-          <span className=" text-3xl font-extrabold text-green-800">
-            AaluPyaz
+          <span className="text-lg md:text-3xl font-extrabold text-green-800">
+            DailySabzi
           </span>
         </div>
 
@@ -46,14 +46,16 @@ const SearchAndFilter = () => {
             <input
               type="text"
               placeholder="Search vegetables..."
-              className="input input-bordered w-24 md:w-[30vw]"
+              className="input input-bordered w-36 md:w-[30vw] text-sm md:text-base"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
 
           <div className="dropdown dropdown-end">
-            <button className="btn btn-outline">Price Filter</button>
+            <button className="btn btn-outline text-xs md:text-base">
+              Price Filter
+            </button>
             <ul
               tabIndex={0}
               className="dropdown-content bg-base-100 shadow-md rounded-box w-52 p-4"
