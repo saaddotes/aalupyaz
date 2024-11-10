@@ -2,9 +2,11 @@
 import { useState } from "react";
 import VegetableCard from "./VegetableCard";
 import { useData } from "@/context/dataContext";
+import NotAvailable from "./NotAvailable";
+import Loading from "./Loading";
 
 const SearchAndFilter = () => {
-  const { vegetables, loading, error } = useData(); // Destructure loading and error
+  const { vegetables, loading, error } = useData();
   const [searchQuery, setSearchQuery] = useState("");
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(500);
@@ -16,10 +18,9 @@ const SearchAndFilter = () => {
     year: "numeric",
   });
   // Handle case when data is loading or there's an error
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Loading />;
   if (error) return <div>Error: {error.message}</div>;
-  if (!vegetables || vegetables.length === 0)
-    return <div>No vegetables available.</div>;
+  if (!vegetables || vegetables.length === 0) return <NotAvailable />;
 
   // Filter vegetables based on search query and price range
   const filteredVegetables = vegetables.filter((vegetable) => {

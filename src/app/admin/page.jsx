@@ -1,5 +1,6 @@
 "use client";
 import Admin from "@/components/Admin";
+import Loading from "@/components/Loading";
 import Login from "@/components/Login";
 import { useAuth } from "@/context/authContext";
 import React from "react";
@@ -10,7 +11,7 @@ export default function page() {
   if (loading) {
     return (
       <div>
-        <p>Loading...</p>
+        <Loading />
       </div>
     );
   }
