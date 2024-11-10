@@ -2,7 +2,7 @@ import Image from "next/image";
 
 const VegetableCard = ({ name, price, imgSrc }) => {
   return (
-    <div className="max-w-xs bg-white rounded-lg shadow-lg overflow-hidden  ">
+    <div className="max-w-xs bg-white rounded-lg shadow-lg overflow-hidden  mx-auto">
       <Image
         src={imgSrc}
         alt={name}

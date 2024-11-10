@@ -244,10 +244,10 @@ export default function Admin() {
                   className="input input-bordered"
                 />
               </div>
-              <div className="modal-action flex justify-between px-2">
+              <div className="modal-action flex justify-between md:px-2">
                 {selectedVegetable.id !== "new" && (
                   <button
-                    className={`btn btn-error text-slate-200 ${
+                    className={`btn btn-error text-slate-200 text-xs md:text-base p-1 md:p-3 ${
                       isDeleting ? "loading" : ""
                     }`}
                     onClick={handleDelete}
@@ -258,13 +258,18 @@ export default function Admin() {
                 )}
                 <div className="space-x-2">
                   <button
-                    className={`btn btn-primary ${isSaving ? "loading" : ""}`}
+                    className={`btn btn-primary text-xs md:text-base p-1 md:p-3 ${
+                      isSaving ? "loading" : ""
+                    }`}
                     onClick={handleSaveChanges}
                     disabled={isSaving || isDeleting}
                   >
                     {isSaving ? "Saving..." : "Save Changes"}
                   </button>
-                  <button className="btn" onClick={handleCloseModal}>
+                  <button
+                    className="btn text-xs md:text-base p-1 md:p-3"
+                    onClick={handleCloseModal}
+                  >
                     Close
                   </button>
                 </div>
