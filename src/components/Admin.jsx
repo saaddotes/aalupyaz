@@ -10,6 +10,8 @@ import {
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import Link from "next/link";
+import { CldUploadWidget } from "next-cloudinary";
+import Fuse from "fuse.js";
 
 export default function Admin() {
   const { vegetables, loading, error } = useData();
@@ -36,7 +38,7 @@ export default function Admin() {
   };
 
   const handleSaveChanges = async () => {
-    setIsSaving(true); // Set saving state to true when saving starts
+    setIsSaving(true);
 
     try {
       // Get the document reference for the selected vegetable
@@ -89,9 +91,23 @@ export default function Admin() {
     }
   };
 
-  const filteredVegetables = vegetables.filter((vegetable) =>
-    vegetable.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handleUpload = (result) => {
+    if (result) {
+      setSelectedVegetable((prevVegetable) => ({
+        ...prevVegetable,
+        imgSrc: result.info.secure_url,
+      }));
+    }
+  };
+
+  const fuse = new Fuse(vegetables, {
+    keys: ["name", "price"],
+    threshold: 0.3,
+  });
+
+  const filteredVegetables = searchQuery
+    ? fuse.search(searchQuery).map((result) => result.item)
+    : vegetables;
 
   if (loading) {
     return <div>Loading...</div>;
@@ -110,7 +126,7 @@ export default function Admin() {
       <div className="navbar bg-base-100 shadow-md py-3">
         <div className="flex-1">
           <span className="text-lg  md:text-3xl font-extrabold text-green-800">
-            DailySabzi
+            AaluPyaz
           </span>
         </div>
         <div className="flex-none gap-2">
@@ -213,20 +229,45 @@ export default function Admin() {
                 />
               </div>
               <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Image URL</span>
+                <span className="label-text">Image URL</span>
+                <label className="input input-bordered flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={selectedVegetable.imgSrc}
+                    onChange={
+                      (e) => e.preventDefault()
+                      // setSelectedVegetable((prev) => ({
+                      //   ...prev,
+                      //   imgSrc: e.target.value,
+                      // }))
+                    }
+                    className="grow text-xs"
+                  />
+                  <div className=" h-8 w-10 flex items-center">
+                    <img
+                      src={selectedVegetable.imgSrc}
+                      alt={selectedVegetable.name}
+                    />
+                  </div>
+
+                  <CldUploadWidget
+                    uploadPreset="eqn2ffmk"
+                    onSuccess={handleUpload}
+                    options={{
+                      sources: ["local", "url", "unsplash"],
+                      multiple: false,
+                      maxFiles: 1,
+                    }}
+                  >
+                    {({ open }) => {
+                      return (
+                        <button className="btn btn-sm" onClick={() => open()}>
+                          Upload Image
+                        </button>
+                      );
+                    }}
+                  </CldUploadWidget>
                 </label>
-                <input
-                  type="text"
-                  value={selectedVegetable.imgSrc}
-                  onChange={(e) =>
-                    setSelectedVegetable((prev) => ({
-                      ...prev,
-                      imgSrc: e.target.value,
-                    }))
-                  }
-                  className="input input-bordered"
-                />
               </div>
               <div className="form-control">
                 <label className="label">
