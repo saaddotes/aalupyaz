@@ -126,7 +126,7 @@ export default function Admin() {
       <div className="navbar bg-base-100 shadow-md py-3">
         <div className="flex-1">
           <span className="text-lg  md:text-3xl font-extrabold text-green-800">
-            AaluPyaz
+            Vegetables Store
           </span>
         </div>
         <div className="flex-none gap-2">

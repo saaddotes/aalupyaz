@@ -4,6 +4,7 @@ import { useState } from "react";
 const VegetableCard = ({ name, price, imgSrc, id, cart, setCart }) => {
   const [quantity, setQuantity] = useState(0);
 
+  // Check if the item is already in the cart
   const isInCart = (cart) => {
     return cart.some(
       (cartItem) =>
@@ -23,10 +24,13 @@ const VegetableCard = ({ name, price, imgSrc, id, cart, setCart }) => {
           cartItem.imgSrc !== imgSrc
       );
       setCart(updatedCart);
+      // addToCart(updatedCart); // Pass updated cart to addToCart
     } else {
       // Add item to cart
       if (quantity > 0) {
-        setCart([...cart, { name, price, imgSrc, quantity }]);
+        const updatedCart = [...cart, { name, price, imgSrc, quantity }];
+        setCart(updatedCart);
+        // addToCart(updatedCart); // Pass updated cart to addToCart
       }
     }
   };

@@ -16,9 +16,9 @@ export default function AdminPage() {
     );
   }
 
-  if (!currentUser) {
-    return <Login />;
-  }
+  // if (!currentUser) {
+  //   return <Login />;
+  // }
 
   return (
     <>
