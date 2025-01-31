@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
 interface ProductCardProps {
   name: string;
@@ -20,9 +21,8 @@ export default function ProductCard({
   cart,
   setCart,
   data,
-  description,
 }: ProductCardProps) {
-  const quantity = 1;
+  const [quantity, setQuantity] = useState(0);
 
   function isInCart(cart: any) {
     return cart.some(
@@ -52,45 +52,62 @@ export default function ProductCard({
   }
 
   return (
-    <div className="relative max-w-xs bg-white rounded-lg shadow-lg overflow-hidden mx-auto select-none pt-4">
+    <div className="relative max-w-xs bg-white rounded-lg shadow-lg overflow-hidden mx-auto select-none">
       <Image
         src={imgSrc}
         alt={name}
         quality={90}
         width={100}
         height={75}
-        className="w-36 h-36 mx-auto object-cover rounded-lg"
+        className="w-36 h-36 mx-auto object-cover"
       />
       <div className="p-3 text-center">
-        <h3 className="text-md font-semibold text-gray-800 line-clamp-1">
-          {name}
-        </h3>
-        <p className="line-clamp-3 min-h-24 dark:text-slate-900">
-          {description}
+        <h3 className="text-md font-semibold text-gray-800">{name}</h3>
+        <p className="text-2xl font-bold text-green-600 my-2">
+          Rs. {quantity > 0 ? price * quantity : price}
         </p>
-        <p className="text-2xl font-bold text-orange-400 my-2 font-mono ">
-          PKR {quantity > 0 ? price * quantity : price}
-        </p>
+        <div className="bg-slate-100 inline-block p-1 rounded-lg my-4">
+          <button
+            disabled={isInCart(cart)}
+            className="btn btn-outline bg-slate-300"
+            onClick={() => setQuantity(quantity > 0 ? quantity - 1 : 0)}
+          >
+            -
+          </button>
+          <span className="mx-2 select-none">{quantity}</span>
+          <button
+            disabled={isInCart(cart)}
+            className="btn btn-outline bg-slate-300"
+            onClick={() => setQuantity(quantity + 1)}
+          >
+            +
+          </button>
+        </div>
         <div className="grid grid-cols-2 gap-2">
           <Link
-            href={`/product/${id}`}
-            className="px-3 select-none py-1.5 rounded-md btn btn-outline"
+            href={`/products/${id}`}
+            className={`px-3 select-none py-1.5 text-white rounded-md w-full transition-colors bg-slate-500 hover:bg-slate-600`}
           >
-            Details
+            View More
           </Link>
           <button
             onClick={handleCartUpdate}
             disabled={quantity < 1 && !isInCart(cart)}
-            className={`px-3 select-none py-1.5 text-white rounded-md transition-colors ${
+            className={`px-3 select-none py-1.5 text-white rounded-md w-full transition-colors ${
               isInCart(cart)
                 ? "bg-red-500 hover:bg-red-600"
-                : "bg-blue-500 hover:bg-blue-400"
+                : "bg-blue-500 hover:bg-blue-600"
             } disabled:bg-blue-300`}
           >
-            {isInCart(cart) ? "Remove" : "Add to Cart"}
+            {isInCart(cart) ? "Remove from Cart" : "Add to Cart"}
           </button>
         </div>
       </div>
+      {quantity > 0 && (
+        <span className="badge badge-neutral absolute top-2 right-2">
+          {quantity}
+        </span>
+      )}
     </div>
   );
 }
