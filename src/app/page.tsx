@@ -1,65 +1,41 @@
 "use client";
 import { useState } from "react";
-import VegetableCard from "./VegetableCard";
+import ProductCard from "@/components/ProductCard";
 import { useData } from "@/context/dataContext";
-import NotAvailable from "./NotAvailable";
-import Loading from "./Loading";
 import Fuse from "fuse.js";
-import ShoppingCart from "./Cart";
+import Loading from "@/components/Loading";
 
-const SearchAndFilter = () => {
-  const { vegetables, loading, error } = useData();
+export default function Home() {
+  const { products, loading, cart, setCart } = useData();
   const [searchQuery, setSearchQuery] = useState("");
-  const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(500);
-  const [cart, setCart] = useState([]);
+  const [minPrice, setMinPrice] = useState<string | number>(0);
+  const [maxPrice, setMaxPrice] = useState<string | number>(100000);
 
-  const now = new Date();
-  const formattedDate = now.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-  if (loading) return <Loading />;
-  if (error) return <div>Error: {error.message}</div>;
-  if (!vegetables || vegetables.length === 0) return <NotAvailable />;
+  // if (loading) return <h1>Loading</h1>;
+  // if (error) return <div>Error: {error.message}</div>;
 
-  const fuse = new Fuse(vegetables, {
+  const fuse = new Fuse(products, {
     keys: ["name", "price"],
     threshold: 0.3,
   });
 
-  const filteredVegetables = (
-    searchQuery
-      ? fuse.search(searchQuery).map((result) => result.item)
-      : vegetables
-  ).filter(
-    (vegetable) => vegetable.price >= minPrice && vegetable.price <= maxPrice
-  );
+  const searchResults = searchQuery
+    ? fuse.search(searchQuery).map((result) => result.item)
+    : products;
 
-  const addToCart = (vegetable) => {
-    setCart((prevCart) => {
-      // Check if the item is already in the cart
-      const itemIndex = prevCart.findIndex((item) => item.id === vegetable.id);
-      if (itemIndex !== -1) {
-        // If it's in the cart, update the quantity
-        const newCart = [...prevCart];
-        newCart[itemIndex].quantity += 1;
-        return newCart;
-      } else {
-        // If it's not in the cart, add it with quantity 1
-        return [...prevCart, { ...vegetable, quantity: 1 }];
-      }
-    });
-  };
+  const filteredproducts = searchResults.filter(
+    (product) =>
+      product.price >= Number(minPrice) &&
+      (Number(maxPrice) > 0 ? product.price <= Number(maxPrice) : true)
+  );
 
   return (
     <div className="relative space-y-6 ">
       <div className="navbar bg-base-100 shadow-md py-2 sticky top-0 z-10 px-10">
-        <div className="flex-1">
-          <img src="/aalupyaz.png" alt="logo" width={"60px"} />
-          <span className="text-lg md:text-3xl font-bold text-pink-600">
-            Vegetables Store
+        <div className="flex-1 flex gap-3 items-center">
+          <img src="/logo.png" alt="logo" width={"30px"} />
+          <span className="text-lg md:text-3xl font-bold text-pink-600 font-mono">
+            VEG Store
           </span>
         </div>
 
@@ -67,14 +43,14 @@ const SearchAndFilter = () => {
           <div className="form-control">
             <input
               type="text"
-              placeholder="Search vegetables..."
+              placeholder="Search products..."
               className="input input-bordered w-36 md:w-[30vw] text-sm md:text-base"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
 
-          <div className="dropdown dropdown-end">
+          <div className="dropdown dropdown-end hidden md:block">
             <button className="btn btn-outline text-xs md:text-base">
               Price Filter
             </button>
@@ -120,38 +96,31 @@ const SearchAndFilter = () => {
               </li>
             </ul>
           </div>
-
-          {/* <div className="hidden md:flex items-center gap-4">
-            <div className="flex items-center space-x-2 bg-blue-100 text-blue-800 p-3 rounded-lg shadow-md">
-              <span className="font-semibold">Rate as Today:</span>
-              <span className="font-semibold">{formattedDate}</span>
-            </div>
-          </div> */}
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-5 ">
-        {filteredVegetables.length > 0 ? (
-          filteredVegetables.map((vegetable, index) => (
-            <div key={`${vegetable.name}-${vegetable.price}-${index}`}>
-              <VegetableCard
-                name={vegetable.name}
-                price={vegetable.price}
-                imgSrc={vegetable.imgSrc}
-                id={vegetable.id}
-                addToCart={() => addToCart(vegetable)}
+        {loading ? (
+          <Loading />
+        ) : filteredproducts.length > 0 ? (
+          filteredproducts.map((product, index) => (
+            <div key={`${product.name}-${product.price}-${index}`}>
+              <ProductCard
+                name={product.name}
+                price={product.price}
+                imgSrc={product.imgSrc}
+                id={product.id}
+                description={product.description}
+                data={product}
                 cart={cart}
                 setCart={setCart}
               />
             </div>
           ))
         ) : (
-          <div>No vegetables match the filter criteria.</div>
+          <div>No products match the filter criteria.</div>
         )}
       </div>
-      {cart.length > 0 && <ShoppingCart items={cart} setItems={setCart} />}
     </div>
   );
-};
-
-export default SearchAndFilter;
+}

@@ -1,14 +1,25 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
 import { auth } from "@/firebase/config";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, User } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 
-const AuthContext = createContext(undefined);
+type AuthContextType = {
+  currentUser: User | null;
+  logout: () => void;
+  loading: boolean;
+  isAdmin: boolean;
+};
 
-export default function AuthContextProvider({ children }) {
-  const [currentUser, setCurrentUser] = useState(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export default function AuthContextProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -49,4 +60,12 @@ export default function AuthContextProvider({ children }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export const useAuth = () => useContext(AuthContext);
+// export const useAuth = () => useContext(AuthContext);
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("AuthContext must be used within an AuthContext");
+  }
+  return context;
+}

@@ -9,7 +9,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
 
   async function LoginAdmin() {
-    const user = await signInWithEmailAndPassword(auth, email, password);
+    await signInWithEmailAndPassword(auth, email, password);
   }
   return (
     <div className="bg-gray-50 font-[sans-serif]">
